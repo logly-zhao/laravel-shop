@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Auth;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
 
@@ -46,5 +48,15 @@ class User extends Authenticatable
         return $this->belongsToMany(Product::class, 'user_favorite_products')
             ->withTimestamps()
             ->orderBy('user_favorite_products.created_at', 'desc');
+    }
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }

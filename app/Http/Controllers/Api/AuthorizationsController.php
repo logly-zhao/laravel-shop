@@ -14,23 +14,24 @@ class AuthorizationsController extends Controller
     //public function weappStore(Request $request)
     {
         $code = $request->code;
-
+        $data = [];
         // 根据 code 获取微信 openid 和 session_key
         $miniProgram = \EasyWeChat::miniProgram();
-        $data = $miniProgram->auth->session($code);
+        $data_code = $miniProgram->auth->session($code);
 
         // 如果结果错误，说明 code 已过期或不正确，返回 401 错误
-        if (isset($data['errcode'])) {
-            return $this->response->errorUnauthorized('code 不正确');
+        if (isset($data_code['errcode'])) {
+            $data['code'] = 999;
+            return $data;
+            //return $this->response->errorUnauthorized('code 不正确');
         }
 
         // 找到 openid 对应的用户
-        $user = User::where('weapp_openid', $data['openid'])->first();
+        $user = User::where('weapp_openid', $data_code['openid'])->first();
 
-        $attributes['weixin_session_key'] = $data['session_key'];
+        $attributes['weixin_session_key'] = $data_code['session_key'];
 
         if (!$user) {
-            $data = [];
             $data['code'] = 10000;
             //return $this->response->errorForbidden('用户不存在');
             return $data;
