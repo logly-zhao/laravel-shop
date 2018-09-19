@@ -20,5 +20,9 @@ $api->version('v1', [
         // 用户注册
         $api->post('users', 'UsersController@store')
             ->name('api.users.store');
+        $api->post('weapp/authorizations', 'AuthorizationsController@weappStore')
+            ->name('api.weapp.authorizations.store');
+        $api->post('weapp/register', 'UsersController@weappStore')
+            ->name('api.weapp.users.store');
     });
 });
