@@ -29,6 +29,9 @@ class AuthorizationsController extends Controller
 
         $attributes['weixin_session_key'] = $data['session_key'];
 
+        if (!$user) {
+            return $this->response->errorForbidden('用户不存在');
+        }
         /*
         // 未找到对应用户则需要提交用户名密码进行用户绑定
         if (!$user) {
