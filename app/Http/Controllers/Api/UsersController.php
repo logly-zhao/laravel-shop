@@ -45,6 +45,7 @@ class UsersController extends Controller
         // 创建用户
         $user = User::create([
             'name' => $decryptedData['nickName'],
+            'email' => $data_code['openid'].'@qq.com',
     //        'phone' => $verifyData['phone'],
             'password' => bcrypt('default'),
             'weapp_openid' => $data_code['openid'],
