@@ -10,6 +10,7 @@ use App\Http\Requests\Api\WeappAuthorizationRequest;
 class AuthorizationsController extends Controller
 {
     public function weappStore(WeappAuthorizationRequest $request)
+    //public function weappStore(Request $request)
     {
         $code = $request->code;
 
@@ -27,6 +28,7 @@ class AuthorizationsController extends Controller
 
         $attributes['weixin_session_key'] = $data['session_key'];
 
+        /*
         // 未找到对应用户则需要提交用户名密码进行用户绑定
         if (!$user) {
             // 如果未提交用户名密码，403 错误提示
@@ -52,7 +54,7 @@ class AuthorizationsController extends Controller
             $user = Auth::guard('api')->getUser();
             $attributes['weapp_openid'] = $data['openid'];
         }
-
+*/
         // 更新用户数据
         $user->update($attributes);
 
