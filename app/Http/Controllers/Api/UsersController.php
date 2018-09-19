@@ -34,7 +34,7 @@ class UsersController extends Controller
             return $this->response->errorUnauthorized('code 不正确');
         }
 
-        $decryptedData = $miniProgram->encryptor->decryptData($data_code['session_key'], $request->iv, $request->encryptData);
+        $decryptedData = $miniProgram->encryptor->decryptData($data_code['session_key'], $request->iv, $request->encryptedData);
         // 如果 openid 对应的用户已存在，报错403
         $user = User::where('weapp_openid', $data_code['openid'])->first();
 
