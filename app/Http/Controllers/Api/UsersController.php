@@ -9,6 +9,20 @@ use App\Http\Requests\Api\UserRequest;
 
 class UsersController extends Controller
 {
+    public function me()
+    {
+        return 'welcome';
+    }
+    public function store(Request $request)
+    {
+        $user = User::all()->first();
+        $para = [];
+        $para['token'] = \Auth::guard('api')->fromUser($user);
+        $para['uid'] = $user->id;
+        $para['code'] = 0;
+        $data['data'] = $para;
+        return $data;
+    }
     public function weappStore(UserRequest $request)
     {
         $data = [];
