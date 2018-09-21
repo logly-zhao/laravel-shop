@@ -9,9 +9,10 @@ use App\Http\Requests\Api\UserRequest;
 
 class UsersController extends Controller
 {
-    public function me()
+    public function check()
     {
-        return 'welcome';
+        $data['code'] = 0;
+        return ;
     }
     public function store(Request $request)
     {

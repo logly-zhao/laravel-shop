@@ -39,7 +39,7 @@ $api->version('v1', [
             ->name('api.company.index');
         $api->group(['middleware' => 'api.auth'], function($api) {
             // 当前登录用户信息
-            $api->get('user', 'UsersController@me')->name('api.user.show');
+            $api->post('check_token', 'UsersController@check')->name('api.user.check');
             $api->post('cart', 'CartController@add')->name('api.cart.add');
             $api->get('cart', 'CartController@index')->name('api.cart.index');
             $api->delete('cart', 'CartController@remove')->name('api.cart.remove');
