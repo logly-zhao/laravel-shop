@@ -26,7 +26,7 @@ class PaymentController extends Controller
         $payment = \EasyWeChat::payment();
         $openid = $request->user()->weapp_openid;
         $result = $payment->order->unify([
-            'body'         => '支付 Laravel Shop 的订单：'.$order->no,
+            'body'         => '大闸蟹订单号：'.$order->no,
             'out_trade_no' => $order->no,
             'trade_type'   => 'JSAPI',  // 必须为JSAPI
             'openid'       => $openid, // 这里的openid为付款人的openid

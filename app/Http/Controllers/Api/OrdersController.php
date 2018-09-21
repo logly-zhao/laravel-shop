@@ -52,17 +52,23 @@ class OrdersController extends Controller
                 array_push($pitem['pics'],$pic);
             }
 
-            if($type == '0' && (!$order->paid_at)) {
-                $pitem['status'] = 0;
-                array_push($lists, $pitem);
-            } else if($type == '1' && ($order->ship_status == 'pending')) {
-                array_push($lists, $pitem);
-            } else if($type == '2' && ($order->ship_status == 'delivered')) {
-                array_push($lists, $pitem);
-            } else if($type == '3' && ($order->ship_status == 'received') && ($order->reviewed == 0)) {
-                array_push($lists, $pitem);
-            } else if($type == '4' && ($order->ship_status == 'pending') && ($order->reviewed > 0)) {
-                array_push($lists, $pitem);
+            if((!$order->paid_at)) {
+                if($type == '0') {
+                    $pitem['status'] = 0;
+                    array_push($lists, $pitem);
+                }
+            } else if($order->ship_status == 'pending') {
+                if($type == '1')
+                    array_push($lists, $pitem);
+            } else if($order->ship_status == 'delivered') {
+                if($type == '2')
+                    array_push($lists, $pitem);
+            } else if(($order->ship_status == 'received') && ($order->reviewed == 0)) {
+                if($type == '3')
+                    array_push($lists, $pitem);
+            } else if(($order->ship_status == 'pending') && ($order->reviewed > 0)) {
+                if($type == '4')
+                    array_push($lists, $pitem);
             }
         }
         $data['orderList'] = $lists;
