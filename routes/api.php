@@ -34,7 +34,9 @@ $api->version('v1', [
             ->name('api.banners.index');
         $api->get('products', 'ProductsController@index')
             ->name('api.banners.index');
-
+        //公司信息
+        $api->get('company', 'CompanyController@index')
+            ->name('api.company.index');
         $api->group(['middleware' => 'api.auth'], function($api) {
             // 当前登录用户信息
             $api->get('user', 'UsersController@me')->name('api.user.show');
@@ -43,11 +45,18 @@ $api->version('v1', [
             $api->delete('cart', 'CartController@remove')->name('api.cart.remove');
 
             $api->get('user_addresses', 'UserAddressesController@index')->name('api.user_addresses.index');
-//            $api->get('user_addresses/create', 'UserAddressesController@create')->name('user_addresses.create');
+            $api->get('first_user_address', 'UserAddressesController@first')->name('api.user_addresses.first');
+            $api->get('update_first_user_address', 'UserAddressesController@updatefirst')->name('api.user_addresses.updatefirst');
             $api->post('user_addresses', 'UserAddressesController@store')->name('api.user_addresses.store');
             $api->get('user_addresses/{product}', 'UserAddressesController@edit')->name('api.user_addresses.edit');
             $api->put('user_addresses/{product}', 'UserAddressesController@update')->name('api.user_addresses.update');
             $api->delete('user_addresses/{product}', 'UserAddressesController@destroy')->name('api.user_addresses.destroy');
+
+            $api->post('orders', 'OrdersController@store')->name('api.orders.store');
+            $api->get('orders', 'OrdersController@index')->name('api.orders.index');
+            $api->get('orders_count', 'OrdersController@count')->name('api.orders.count');
+            $api->get('orders/{order}', 'OrdersController@show')->name('api.orders.show');
+            $api->get('payment/{order}/wechat', 'PaymentController@payByWechat')->name('api.payment.wechat');
         });
 
         $api->get('products/{product}', 'ProductsController@show')->name('api.products.show');

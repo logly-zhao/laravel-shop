@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Services;
-
 use App\Exceptions\CouponCodeUnavailableException;
 use App\Exceptions\InternalException;
 use App\Jobs\RefundInstallmentOrder;

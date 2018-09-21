@@ -73,7 +73,7 @@ class UserAddressesController extends Controller
 //        return view('user_addresses.create_and_edit', ['address' => ]);*/
     }
 
-    public function update(UserRequest $request)
+    public function update(UserAddressRequest $request)
     {
         $user_address = UserAddress::query()->where('id', $request->product)->first();
 
@@ -99,5 +99,38 @@ class UserAddressesController extends Controller
         $this->authorize('own', $user_address);
         $user_address->delete();
         return [];
+    }
+
+    public function updatefirst(Request $request) {
+        $user_address = UserAddress::query()->where('id', $request->id)->first();
+        if($user_address) {
+            $data['code'] = 0;
+            $last_used_at = date('Y-m-d H:i:s');
+            $user_address->update(['last_used_at'=>$last_used_at]);
+        } else
+        $data['code'] = 1;
+        return $data;
+    }
+
+    public function first(Request $request)
+    {
+        $data = [];
+        $address = $request->user()->addresses()->orderBy('updated_at', 'desc')->get()->first();
+        if($address) {
+            $data['code'] = 0;
+            $item = [];
+            $item['id'] = $address->id ;
+            $item['linkMan'] = $address->contact_name ;
+            $item['mobile'] = $address->contact_phone;
+            //$item['address'] = $address->province.$address->city.$address->district.$address->address;
+            $item['address'] = $address->getFullAddressAttribute();
+            $item['code'] = $address->zip;
+
+            $data['data'] = $item;
+        } else {
+            $data['code'] = 999;
+            return $data;
+        }
+        return $data;
     }
 }
