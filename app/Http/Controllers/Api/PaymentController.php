@@ -39,7 +39,7 @@ class PaymentController extends Controller
             $data['code'] = 0;
             // 二次签名的参数必须与下面相同
             $params = [
-    //            'appId'     => '你的小程序的appid',
+                'appId'     => config('wechat.payment.default.app_id'),
                 'timeStamp' => time(),
                 'nonceStr'  => $result['nonce_str'],
                 'prepayId'  => $result['prepay_id'],
