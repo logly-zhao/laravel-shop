@@ -13,8 +13,9 @@ use function EasyWeChat\Kernel\Support\generate_sign;
 
 class PaymentController extends Controller
 {
-    public function payByWechat(Order $order, Request $request)
+    public function payByWechat(Request $request)
     {
+        $order = Order::query()->where('id', $request->order)->first();
         $this->authorize('own', $order);
         if ($order->paid_at || $order->closed) {
             throw new InvalidRequestException('订单状态不正确');
@@ -24,6 +25,13 @@ class PaymentController extends Controller
 
         $payment = \EasyWeChat::payment();
         $openid = $request->user()->weapp_openid;
+        $data = [
+            'body'         => '支付 Laravel Shop 的订单：'.$order->no,
+            'out_trade_no' => $order->no,
+            'trade_type'   => 'JSAPI',  // 必须为JSAPI
+            'openid'       => $openid, // 这里的openid为付款人的openid
+            'total_fee'    => (floatval($request->money))*100, // 总价
+        ];
         $result = $payment->order->unify([
             'body'         => '支付 Laravel Shop 的订单：'.$order->no,
             'out_trade_no' => $order->no,
