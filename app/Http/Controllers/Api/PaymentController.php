@@ -40,10 +40,10 @@ class PaymentController extends Controller
             // 二次签名的参数必须与下面相同
             $params = [
                 'appId'     => config('wechat.payment.default.app_id'),
-                'timeStamp' => time(),
                 'nonceStr'  => $result['nonce_str'],
-                'prepayId'  => $result['prepay_id'],
+                'package'  => 'prepay_id='.$result['prepay_id'],
                 'signType'  => 'MD5',
+                'timeStamp' => strval(time()),
             ];
 
             // config('wechat.payment.default.key')为商户的key
