@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
 use App\Exceptions\InternalException;
 use App\Http\Requests\CrowdFundingOrderRequest;
 use App\Http\Requests\SeckillOrderRequest;
@@ -23,19 +22,55 @@ class OrdersController extends Controller
 {
     public function index(Request $request)
     {
+        /*
         $orders = Order::all()
   //          ->with(['items.product', 'items.productSku'])
             ->where('user_id', $request->user()->id);
  //           ->orderBy('created_at', 'desc');
+*/
+
+        $orders = Order::query()
+            ->with(['items.product', 'items.productSku'])
+            ->where('user_id', $request->user()->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate();
 
         $data = [];
         $lists = [];
-        $type = $request->input('type');
+        $type = intval($request->input('type'));
+
+        switch($type){
+            case 0://未支付
+                $orders = Order::query()->with(['items.product', 'items.productSku'])->where('user_id', $request->user()->id)->where('closed', 0)
+                    ->where('paid_at', NULL)
+                    ->orderBy('created_at', 'desc')->get();
+                break;
+            case 1://待发货、待收货
+                $orders = Order::query()->with(['items.product', 'items.productSku'])->where('user_id', $request->user()->id)->where('closed', 0)
+                    ->whereNotNull('paid_at')->whereIn('ship_status',['pending','delivered'])
+                    ->orderBy('created_at', 'desc')->get();
+                break;
+            case 2://待评价
+                $orders = Order::query()->with(['items.product', 'items.productSku'])->where('user_id', $request->user()->id)->where('closed', 0)
+                    ->whereNotNull('paid_at')->where('ship_status','received')->where('reviewed',0)
+                    ->orderBy('created_at', 'desc')->get();
+                break;
+            case 3://已完成
+                $orders = Order::query()->with(['items.product', 'items.productSku'])->where('user_id', $request->user()->id)->where('closed', 0)
+                    ->whereNotNull('paid_at')->where('ship_status','received')->where('reviewed',1)
+                    ->orderBy('created_at', 'desc')->get();
+                break;
+            case 4:
+                $orders = Order::query()->with(['items.product', 'items.productSku'])->where('user_id', $request->user()->id)->where('closed', 1)
+                    ->orderBy('created_at', 'desc')->get();
+                break;
+        }
+
         foreach($orders as $order) {
             $pitem = [];
             $pitem['dateAdd'] = $order->created_at->format('Y-m-d H:i:s');
             $pitem['orderNumber'] = $order->no;
-            $pitem['status'] = 1;
+            $pitem['status'] = 0;
             $pitem['statusStr'] = '';
             $pitem['remark'] = '';
             if($order->remark)
@@ -43,33 +78,36 @@ class OrdersController extends Controller
             $pitem['amountReal'] = $order->total_amount;
             $pitem['score'] = 0;
             $pitem['id'] = $order->id;
-     //       if($order->closed == 1)
-     //           continue;
             $pitem['pics'] = [];
             foreach($order->items as $index => $item) {
                 $pic = [];
                 $pic['pic'] = $item->product->image_url;
                 array_push($pitem['pics'],$pic);
             }
+            $pitem['status'] = $type;
 
-            if((!$order->paid_at)) {
-                if($type == '0') {
-                    $pitem['status'] = 0;
-                    array_push($lists, $pitem);
-                }
-            } else if($order->ship_status == 'pending') {
-                if($type == '1')
-                    array_push($lists, $pitem);
-            } else if($order->ship_status == 'delivered') {
-                if($type == '2')
-                    array_push($lists, $pitem);
-            } else if(($order->ship_status == 'received') && ($order->reviewed == 0)) {
-                if($type == '3')
-                    array_push($lists, $pitem);
-            } else if(($order->ship_status == 'pending') && ($order->reviewed > 0)) {
-                if($type == '4')
-                    array_push($lists, $pitem);
+            switch($type){
+                case 0://未支付
+                    $pitem['statusStr'] = '请于'.$order->created_at->addSeconds(config('app.order_ttl'))->format('H:i').'前完成支付';
+                    break;
+                case 1://待发货、待收货
+                    if($order->ship_status == 'pending') {
+                        $pitem['statusStr'] = "待发货";
+                    } else {
+                        $pitem['statusStr'] = "待收货";
+                        $pitem['status'] = 5;
+                    }
+                    break;
+                case 2://待评价
+                    $pitem['statusStr'] = "待评价";
+                    break;
+                case 3://已完成
+                    break;
+                case 4:
+                    $pitem['statusStr'] = "已关闭";
+                    break;
             }
+            array_push($lists, $pitem);
         }
         $data['orderList'] = $lists;
         $data['code'] = 0;
@@ -91,37 +129,36 @@ class OrdersController extends Controller
         $data = [];
         $paras = [];
         $no_pay_count = 0;
-        $no_transfer_count = 0;
+        $close_count = 0;
         $no_confirm_count = 0;
         $no_reputation_count = 0;
         $success_count = 0;
         foreach($orders as $order) {
             if($order->closed == 1)
-                continue;
-            if(!$order->paid_at) {
+                $close_count++;
+            else if(!$order->paid_at)
                 $no_pay_count++;
-            } else {
+            else {
                 switch($order->ship_status) {
                     case 'pending':
-                        $no_transfer_count++;
-                        break;
                     case 'delivered':
                         $no_confirm_count++;
                         break;
                     case 'received';
                         if(($order->reviewed) > 0)
-                            ($success_count++);
+                            $success_count++;
                         else
-                            ($no_reputation_count++);
+                            $no_reputation_count++;
                         break;
                 }
             }
         }
         $paras['count_id_no_pay'] = $no_pay_count;
-        $paras['count_id_no_transfer'] = $no_transfer_count;
         $paras['count_id_no_confirm'] = $no_confirm_count;
         $paras['count_id_no_reputation'] = $no_reputation_count;
         $paras['count_id_success'] = $success_count;
+        $paras['count_id_closed'] = $close_count;
+
         $data['data'] = $paras;
         $data['code'] = 0;
         return $data;
@@ -131,7 +168,7 @@ class OrdersController extends Controller
     {
         $this->authorize('own', $order);
 
-        return view('orders.show', ['order' => $order->load(['items.productSku', 'items.product'])]);
+        return [];
     }
 
     public function store(OrderRequest $request, OrderService $orderService)
@@ -175,20 +212,44 @@ class OrdersController extends Controller
         return $data;
     }
 
-    public function received(Order $order, Request $request)
+    public function received(Request $request)
     {
+        $data = [];
+        $data['code'] = 0;
+        $order = Order::query()->where('id', $request->order)->first();
         // 校验权限
         $this->authorize('own', $order);
 
         // 判断订单的发货状态是否为已发货
         if ($order->ship_status !== Order::SHIP_STATUS_DELIVERED) {
-            throw new InvalidRequestException('发货状态不正确');
+            $data['code'] = 999;
+            $data['msg'] = '发货状态不正确';
         }
 
         // 更新发货状态为已收到
         $order->update(['ship_status' => Order::SHIP_STATUS_RECEIVED]);
 
-        return $order;
+        return $data;
+    }
+
+    public function close(Request $request)
+    {
+        $data = [];
+        $data['code'] = 0;
+        $order = Order::query()->where('id', $request->order)->first();
+        // 校验权限
+        $this->authorize('own', $order);
+
+        // 判断订单的发货状态是否为已发货
+        if ($order->paid_at) {
+            $data['code'] = 999;
+            $data['msg'] = '订单已支付不能取消，请申请退款';
+        }
+
+        // 关闭订单
+        $order->update(['closed' => 1]);
+
+        return $data;
     }
 
     public function review(Order $order)

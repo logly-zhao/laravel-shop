@@ -56,6 +56,8 @@ $api->version('v1', [
             $api->get('orders', 'OrdersController@index')->name('api.orders.index');
             $api->get('orders_count', 'OrdersController@count')->name('api.orders.count');
             $api->get('orders/{order}', 'OrdersController@show')->name('api.orders.show');
+            $api->post('orders/{order}/received', 'OrdersController@received')->name('api.orders.received');
+            $api->post('orders/{order}/close', 'OrdersController@close')->name('api.orders.close');
             $api->get('payment/{order}/wechat', 'PaymentController@payByWechat')->name('api.payment.wechat');
         });
 
