@@ -42,6 +42,7 @@ class OrdersController extends Controller
                 $pitem['remark'] = $order->remark;
             $pitem['amountReal'] = $order->total_amount;
             $pitem['score'] = 0;
+            $pitem['id'] = $order->id;
      //       if($order->closed == 1)
      //           continue;
             $pitem['pics'] = [];
