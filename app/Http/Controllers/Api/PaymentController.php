@@ -30,7 +30,7 @@ class PaymentController extends Controller
             'out_trade_no' => $order->no,
             'trade_type'   => 'JSAPI',  // 必须为JSAPI
             'openid'       => $openid, // 这里的openid为付款人的openid
-            'total_fee'    => (floatval($request->input['money']))*100, // 总价
+            'total_fee'    => (floatval($request->money))*100, // 总价
         ]);
 
         $data = [];
