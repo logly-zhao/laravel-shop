@@ -17,7 +17,8 @@ use App\Http\Requests\ApplyRefundRequest;
 use App\Exceptions\CouponCodeUnavailableException;
 use App\Models\CouponCode;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Log;
+use App\Models\OrderItem;
 class OrdersController extends Controller
 {
     public function index(Request $request)
@@ -211,6 +212,7 @@ class OrdersController extends Controller
         $goods = [];
         foreach($order->items as $index => $item) {
             $good = [];
+            $good['goodsId'] = $item->id;
             $good['pic'] = $item->product->image_url;
             $good['goodsName'] = $item->product->title;
             $good['amount'] = $item->price;
@@ -315,24 +317,45 @@ class OrdersController extends Controller
         // 使用 load 方法加载关联数据，避免 N + 1 性能问题
         return view('orders.review', ['order' => $order->load(['items.productSku', 'items.product'])]);
     }
-
-    public function sendReview(SendReviewRequest $request)
+//SendReviewRequest
+    public function sendReview(Request $request)
     {
+
+        $data = [];
+        $data['code'] = 0;
+        $order = Order::query()->with(['items'])->where('id', $request->order)->first();
         // 校验权限
         $this->authorize('own', $order);
-        if (!$order->paid_at) {
-            throw new InvalidRequestException('该订单未支付，不可评价');
+
+        // 判断订单的发货状态是否为已发货
+        if ($order->ship_status !== Order::SHIP_STATUS_RECEIVED) {
+            $data['code'] = 999;
+            $data['msg'] = '发货状态不正确';
+            return $data;
         }
         // 判断是否已经评价
         if ($order->reviewed) {
-            throw new InvalidRequestException('该订单已评价，不可重复提交');
+            $data['code'] = 999;
+            $data['msg'] = '该订单已评价';
+            return $data;
         }
-        $reviews = $request->input('reviews');
+
+        $reviews = $request->reviews;
         // 开启事务
         \DB::transaction(function () use ($reviews, $order) {
             // 遍历用户提交的数据
             foreach ($reviews as $review) {
-                $orderItem = $order->items()->find($review['id']);
+                $orderItem = OrderItem::query()->where('order_id', $order->id)
+                    ->where('id',$review['id'])->get()->first();
+                if($orderItem)
+                {
+                    Log::error('no item');
+
+                }else
+                {
+                    Log::info('find item');
+
+                }
                 // 保存评分和评价
                 $orderItem->update([
                     'rating'      => $review['rating'],
@@ -344,8 +367,9 @@ class OrdersController extends Controller
             $order->update(['reviewed' => true]);
             event(new OrderReviewd($order));
         });
-
-        return redirect()->back();
+        $data['code'] = 0;
+        $data['msg'] = '评价成功';
+        return $data;
     }
 
     public function applyRefund(Order $order, ApplyRefundRequest $request)
