@@ -164,11 +164,63 @@ class OrdersController extends Controller
         return $data;
     }
 
-    public function show(Order $order, Request $request)
+    public function show(Request $request)
     {
+        $order = Order::query()->with(['items.product', 'items.productSku'])->where('id', $request->order)->get()->first();
         $this->authorize('own', $order);
+        $data = [];
+        $para = [];
+        $data['code'] = 0;
+        $info = [];
 
-        return [];
+        $info['statusStr'] = '';
+        $info['status'] = 0;
+        if($order->closed) {
+            $info['status'] = 4;
+            $info['statusStr'] = '订单已关闭';
+        } else if(!$order->paid_at) {
+            $info['status'] = 0;
+            $info['statusStr'] = '请于'.$order->created_at->addSeconds(config('app.order_ttl'))->format('H:i').'前完成支付';
+        } else if($order->ship_status == 'pending') {
+            $info['status'] = 1;
+            $info['statusStr'] = '待发货';
+        } else if($order->ship_status == 'delivered') {
+            $info['status'] = 5;
+            $info['statusStr'] = '已发货待确认';
+        } else if($order->ship_status == 'received') {
+            if($order->reviewed == 0) {
+                $info['status'] = 2;
+                $info['statusStr'] = '待评价';
+            } else {
+                $info['status'] = 3;
+                $info['statusStr'] = '已完成';
+            }
+        }
+        $info['id'] = $order->id;
+        $info['amount'] = $order->total_amount;
+        $info['amountReal'] = $order->total_amount;
+        $para['orderInfo'] = $info;
+
+        $wuliu = [];
+        $wuliu['trackingNumber'] = $order->ship_data['express_company'].$order->ship_data['express_no'];
+        $wuliu['linkMan'] = $order->address['contact_name'];
+        $wuliu['mobile'] = $order->address['contact_phone'];
+        $wuliu['address'] = $order->address['address'];
+        $para['logistics'] =$wuliu;
+
+        $goods = [];
+        foreach($order->items as $index => $item) {
+            $good = [];
+            $good['pic'] = $item->product->image_url;
+            $good['goodsName'] = $item->product->title;
+            $good['amount'] = $item->price;
+            $good['number'] = $item->amount;
+            $good['property'] = $item->productSku->title;
+            array_push($goods, $good);
+        }
+        $para['goods'] = $goods;
+        $data['data'] = $para;
+        return $data;
     }
 
     public function store(OrderRequest $request, OrderService $orderService)
@@ -264,7 +316,7 @@ class OrdersController extends Controller
         return view('orders.review', ['order' => $order->load(['items.productSku', 'items.product'])]);
     }
 
-    public function sendReview(Order $order, SendReviewRequest $request)
+    public function sendReview(SendReviewRequest $request)
     {
         // 校验权限
         $this->authorize('own', $order);
