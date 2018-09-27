@@ -46,4 +46,11 @@ Route::group([
     $router->post('seckill_products', 'SeckillProductsController@store');
     $router->get('seckill_products/{id}/edit', 'SeckillProductsController@edit');
     $router->put('seckill_products/{id}', 'SeckillProductsController@update');
+
+    $router->get('banners', 'BannersController@index');
+    $router->get('banners/create', 'BannersController@create');
+    $router->get('banners/{id}/edit', 'BannersController@edit');
+    $router->post('banners', 'BannersController@store');
+    $router->put('banners/{id}', 'BannersController@update');
+    $router->delete('banners/{id}', 'BannersController@destroy');
 });

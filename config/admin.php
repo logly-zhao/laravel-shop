@@ -5,17 +5,17 @@ return [
     /*
      * 站点标题
      */
-    'name' => 'Laravel Shop',
+    'name' => '大闸蟹商场',
 
     /*
      * 页面顶部 Logo
      */
-    'logo' => '<b>Laravel</b> Shop',
+    'logo' => '<b>大闸蟹</b> 商场',
 
     /*
      * 页面顶部小 Logo
      */
-    'logo-mini' => '<b>LS</b>',
+    'logo-mini' => '<b>DZX</b>',
 
     /*
      * 路由配置
@@ -37,7 +37,7 @@ return [
     /*
      * Laravel-Admin 页面标题
      */
-    'title' => 'Laravel Shop 管理后台',
+    'title' => '大闸蟹销售 管理后台',
 
     /*
      * 是否使用 https

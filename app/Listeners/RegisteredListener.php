@@ -16,6 +16,6 @@ class RegisteredListener implements ShouldQueue
         // 获取到刚刚注册的用户
         $user = $event->user;
         // 调用 notify 发送通知
-        $user->notify(new EmailVerificationNotification());
+//        $user->notify(new EmailVerificationNotification());
     }
 }
