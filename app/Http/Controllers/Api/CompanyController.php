@@ -22,10 +22,10 @@ class CompanyController extends Controller
         $banner5['picUrl'] = "https://www.52hairycrab.com/storage/img/us5.jpg";
         array_push($para, $banner1, $banner2, $banner3, $banner4, $banner5);
         $data['banners'] = $para;
-        $data['address'] = "江苏省昆山市";
-        $data['weixin'] = "xianshagnxianxia";
-        $data['qq'] = "12345678";
-        $data['mobile'] = '18551111111';
+        $data['address'] = "昆山市巴城镇正仪巴解蟹市场";
+        $data['weixin'] = "Yangcheng_Crab";
+        $data['qq'] = "3591377691";
+        $data['mobile'] = '13506266106';
         return $data;
     }
 }
