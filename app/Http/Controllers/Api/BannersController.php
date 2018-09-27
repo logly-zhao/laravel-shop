@@ -16,8 +16,8 @@ class BannersController extends Controller
         foreach($banners as $banner) {
             $item = [];
             $item['businessId'] = $banner->id;
-            //$item['picUrl'] = "https://www.52hairycrab.com/storage/".$banner->image;
-            $item['picUrl'] = "http://shop.test/storage/".$banner->image;
+            $item['picUrl'] = "https://www.52hairycrab.com/storage/".$banner->image;
+            //$item['picUrl'] = "http://shop.test/storage/".$banner->image;
             array_push($para, $item);
         }
         $data['data'] = $para;

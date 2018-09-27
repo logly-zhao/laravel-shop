@@ -4,12 +4,23 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Banner;
 
 class CompanyController extends Controller
 {
     public function index() {
+        $banners = Banner::query()->where('is_front', false)->get();
+
         $data['code'] = 0;
         $para = [];
+        foreach($banners as $banner) {
+            $item = [];
+            $item['businessId'] = $banner->id;
+            $item['picUrl'] = "https://www.52hairycrab.com/storage/".$banner->image;
+            //$item['picUrl'] = "http://shop.test/storage/".$banner->image;
+            array_push($para, $item);
+        }
+        /*
         $banner1['businessId'] = 1;
         $banner1['picUrl'] = "https://www.52hairycrab.com/storage/img/us1.jpg";
         $banner2['businessId'] = 2;
@@ -21,6 +32,7 @@ class CompanyController extends Controller
         $banner5['businessId'] = 5;
         $banner5['picUrl'] = "https://www.52hairycrab.com/storage/img/us5.jpg";
         array_push($para, $banner1, $banner2, $banner3, $banner4, $banner5);
+        */
         $data['banners'] = $para;
         $data['address'] = "昆山市巴城镇正仪巴解蟹市场";
         $data['weixin'] = "Yangcheng_Crab";
