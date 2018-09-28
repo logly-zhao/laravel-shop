@@ -76,7 +76,7 @@ class OrdersController extends Controller
             $app = \EasyWeChat::miniProgram();
             $app->template_message->send([
                 'touser' => $user->weapp_openid,
-                'template_id' => '订单发货提醒	',
+                'template_id' => 'NLO9AaLUqRWsgNxes_f4_CdTPfhs6MqxubK-D1nD9sc',
                 'page' => '/pages/order-list/index',
                 'form_id' => strval($order->prepay_id),
                 'data' => [
