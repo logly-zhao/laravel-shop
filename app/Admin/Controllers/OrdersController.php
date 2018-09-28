@@ -81,7 +81,7 @@ class OrdersController extends Controller
                 'form_id' => strval($order->prepay_id),
                 'data' => [
                     'keyword1' => '线上蟹下大闸蟹',
-                    'keyword2' => $order->product->title,
+                    'keyword2' => '测试产品',
                     'keyword3' => strval($order->total_amount),
                     'keyword4' => date('Y-m-d H:i:s'),
                     'keyword5' => $data['express_company'].$data['express_no'],
