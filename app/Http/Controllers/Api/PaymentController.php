@@ -45,7 +45,7 @@ class PaymentController extends Controller
                 'signType'  => 'MD5',
                 'timeStamp' => strval(time()),
             ];
-
+            $order->update(['prepay_id'=>$result['prepay_id']]);
             // config('wechat.payment.default.key')为商户的key
             $params['paySign'] = generate_sign($params, config('wechat.payment.default.key'));
             $data['data'] = $params;

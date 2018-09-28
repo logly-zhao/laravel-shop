@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Exceptions\InternalException;
 use App\Models\CrowdfundingProduct;
 use App\Models\Order;
+use App\Models\User;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use App\Exceptions\InvalidRequestException;
@@ -15,6 +16,7 @@ use Encore\Admin\Layout\Content;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\ModelForm;
 use App\Http\Requests\Admin\HandleRefundRequest;
+use EasyWeChat;
 
 class OrdersController extends Controller
 {
@@ -67,7 +69,27 @@ class OrdersController extends Controller
             // 因此这里可以直接把数组传过去
             'ship_data'   => $data, 
         ]);
-
+        //logly add 发送模板消息通知用户
+        if($order->payment_method == 'wechat');
+        $user = User::query()->where('id', $order->user_id)->get()->first();
+        if($user) {
+            $app = \EasyWeChat::miniProgram();
+            $app->template_message->send([
+                'touser' => $user->weapp_openid,
+                'template_id' => '订单发货提醒	',
+                'page' => '/pages/order-list/index',
+                'form_id' => strval($order->prepay_id),
+                'data' => [
+                    'keyword1' => '线上蟹下大闸蟹',
+                    'keyword2' => $order->product->title,
+                    'keyword3' => strval($order->total_amount),
+                    'keyword4' => date('Y-m-d H:i:s'),
+                    'keyword5' => $data['express_company'].$data['express_no'],
+                    'keyword6' => $order->address['contact_name'],
+                    'keyword7' => $order->address['contact_phone']
+                ],
+            ]);
+        }
         // 返回上一页
         return redirect()->back();
     }

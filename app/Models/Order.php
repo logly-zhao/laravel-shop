@@ -50,6 +50,7 @@ class Order extends Model
         'paid_at',
         'payment_method',
         'payment_no',
+        'prepay_id',
         'refund_status',
         'refund_no',
         'closed',
