@@ -70,7 +70,7 @@ class ProductsController extends Controller
         // 通过 collect 函数将返回结果转为集合，并通过集合的 pluck 方法取到返回的商品 ID 数组
         $productIds = collect($result['hits']['hits'])->pluck('_id')->all();
         // 通过 whereIn 方法从数据库中读取商品数据
-        $products = Product::query()->byIds($productIds)->get();
+        $products = Product::query()->whereIn('id', $productIds)->orderBy('created_at', 'asc')->get();
         $categoris = [];
         foreach($products as $product) {
             $item =
