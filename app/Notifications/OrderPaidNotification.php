@@ -27,7 +27,14 @@ class OrderPaidNotification extends Notification
 
     public function toMail($notifiable)
     {
-        $title = '订单支付成功:'.$this->order->address['contact_name'].'电话'.$this->order->address['contact_phone'].$this->order->address['address'];
+        $goods = '';
+        foreach($this->order->items as $item) {
+            $goods .= ("商品：".$item->product->title."数量：".$item->amount."件 ");
+
+        }
+        $title = '地址：'.$this->order->address['address'].'姓名：'.$this->order->address['contact_name'].
+            '电话：'.$this->order->address['contact_phone'].$goods;
+
         return (new MailMessage)
                     ->cc('18806130282@139.com')
                     ->subject($title)  // 邮件标题
