@@ -27,7 +27,7 @@ class OrderPaidNotification extends Notification
 
     public function toMail($notifiable)
     {
-        $goods = '';
+        $goods = '，';
         foreach($this->order->items as $item) {
             $goods .= ($item->product->title."*".$item->amount."件，");
 
