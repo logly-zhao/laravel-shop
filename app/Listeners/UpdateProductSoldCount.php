@@ -17,12 +17,16 @@ class UpdateProductSoldCount implements ShouldQueue
         // 循环遍历订单的商品
         foreach ($order->items as $item) {
             $product   = $item->product;
+            $oldCount = $product->sold_count;
             // 计算对应商品的销量
+            $soldCount = $oldCount + $item->amount;
+            /*
             $soldCount = OrderItem::query()
                 ->where('product_id', $product->id)
                 ->whereHas('order', function ($query) {
                     $query->whereNotNull('paid_at');  // 关联的订单状态是已支付
                 })->sum('amount');
+            */
             // 更新商品销量
             $product->update([
                 'sold_count' => $soldCount,

@@ -16,3 +16,4 @@ yarn-error.log
 /public/mix-manifest.json
 /resources/wechat_pay
 /config/wechat.php
+/config/admin.php
