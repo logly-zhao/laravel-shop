@@ -36,11 +36,15 @@ class OrderPaidNotification extends Notification
             '，'.$this->order->address['contact_phone'].$goods;
 
         return (new MailMessage)
-                    ->cc('18806130282@139.com')
+                    //->cc('18806130282@139.com')
+                    //->cc('792869589@qq.com')
+                    ->cc('minisky_007@163.com')
+                    ->bcc('18862211158@139.com')
+                    //->bcc('loglymail@163.com')
                     ->subject($title)  // 邮件标题
                     ->greeting('您好：') // 欢迎词
                     ->line($this->order->created_at->format('m-d H:i').' 创建的订单已经支付成功。') // 邮件内容
-                    ->action('查看订单', route('orders.show', [$this->order->id])) // 邮件中的按钮及对应链接
+                    ->action('查看订单', route('admin.orders.show', [$this->order->id])) // 邮件中的按钮及对应链接
                     ->success(); // 按钮的色调
     }
 }

@@ -146,6 +146,39 @@ class PaymentController extends Controller
 
     public function wechatNotify()
     {
+//logly change use easywechat insteadof yansonda
+/*
+	$app = app('wechat.payment');
+	$response = $app->handlePaidNotify(function($message, $fail){
+	
+        // 找到对应的订单
+        $order = Order::where('no', $message['out_trade_no'])->first();
+        // 订单不存在则告知微信支付
+	if ($order) {
+	// 订单已支付
+	if ($order->paid_at) {
+	// 告知微信支付此订单已处理
+	app('wechat_pay')->success();
+	return true;
+	}
+
+	// 将订单标记为已支付
+	$order->update([
+			'paid_at'        => Carbon::now(),
+			'payment_method' => 'wechat',
+			'payment_no'     => $message['transaction_id'],
+	]);
+	$this->afterPaid($order);
+
+	app('wechat_pay')->success();
+	return true;
+	}
+	$fail('Order not exists.');
+	});
+	return $response;
+*/
+
+        /*
         // 校验回调参数是否正确
         $data  = app('wechat_pay')->verify();
         // 找到对应的订单
@@ -168,7 +201,46 @@ class PaymentController extends Controller
         ]);
         $this->afterPaid($order);
 
-        return app('wechat_pay')->success();
+        return app('wechat_pay')->success();*/
+
+        $app = app('wechat.payment');
+        $response = $app->handlePaidNotify(function($message, $fail){
+
+            // 找到对应的订单
+            $order = Order::where('no', $message['out_trade_no'])->first();
+            // 订单不存在则告知微信支付
+            if ($order) {
+                // 订单已支付
+                if ($order->paid_at) {
+                    // 告知微信支付此订单已处理
+                    return true;
+                }
+
+                if ($message['return_code'] === 'SUCCESS') { // return_code 表示通信状态，不代表支付状态
+                    // 用户是否支付成功
+                    if (array_get($message, 'result_code') === 'SUCCESS') {
+                        // 将订单标记为已支付
+                        $order->update([
+                            'paid_at'        => Carbon::now(),
+                            'payment_method' => 'wechat',
+                            'payment_no'     => $message['transaction_id'],
+                        ]);
+                        $this->afterPaid($order);
+                        // 用户支付失败
+                    } elseif (array_get($message, 'result_code') === 'FAIL') {
+                        $order->update([
+                            'closed'        => true,
+                        ]);
+                    }
+                } else {
+                    return $fail('通信失败，请稍后再通知我');
+                }
+                return true;
+            }
+            else
+                return $fail('订单不存在');
+        });
+        return $response;
     }
 
     protected function afterPaid(Order $order)
